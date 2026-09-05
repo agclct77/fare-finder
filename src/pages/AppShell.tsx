@@ -24,7 +24,7 @@ export default function AppShell({ user }: { user: User }) {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-          <span className="text-lg font-semibold tracking-tight">Flight Price Notifier</span>
+          <span className="font-display text-lg font-semibold tracking-tight">Flight Price Notifier</span>
           <button
             onClick={handleSignOut}
             className="rounded-lg border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/70"
@@ -35,7 +35,7 @@ export default function AppShell({ user }: { user: User }) {
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-4 py-20 text-center sm:px-6">
-        <h1 className="fade-up text-3xl font-bold tracking-tight sm:text-4xl">Hi {user.email}</h1>
+        <h1 className="fade-up font-display text-3xl font-bold tracking-tight sm:text-4xl">Hi {user.email}</h1>
         <p
           className="fade-up mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground"
           style={{ "--fade-delay": "120ms" } as React.CSSProperties}

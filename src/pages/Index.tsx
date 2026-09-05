@@ -35,7 +35,7 @@ export default function Index() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <span className="text-lg font-semibold tracking-tight">Flight Price Notifier</span>
+          <span className="font-display text-lg font-semibold tracking-tight">Flight Price Notifier</span>
           <Link
             to="/signin"
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
@@ -55,7 +55,7 @@ export default function Index() {
             機票降價通知
           </p>
           <h1
-            className="fade-up text-4xl font-bold leading-tight tracking-tight sm:text-6xl"
+            className="fade-up font-display text-4xl font-bold leading-tight tracking-tight sm:text-6xl"
             style={{ "--fade-delay": "100ms" } as React.CSSProperties}
           >
             Flight Price Notifier

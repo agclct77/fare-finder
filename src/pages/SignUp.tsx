@@ -40,7 +40,7 @@ export default function SignUp() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="fade-up w-full max-w-md rounded-2xl border border-border bg-card p-8">
-        <h1 className="text-2xl font-bold tracking-tight">Sign up / 註冊</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">Sign up / 註冊</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Create an account to start tracking flight prices.
         </p>

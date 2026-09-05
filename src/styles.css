@@ -40,33 +40,34 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  /* Near-black violet-tinted dark theme */
-  --background: oklch(0.145 0.02 290);
-  --foreground: oklch(0.95 0.01 290);
-  --card: oklch(0.185 0.025 290);
-  --card-foreground: oklch(0.95 0.01 290);
-  --popover: oklch(0.185 0.025 290);
-  --popover-foreground: oklch(0.95 0.01 290);
-  --primary: oklch(0.62 0.21 293);
-  --primary-foreground: oklch(0.98 0.01 290);
-  --secondary: oklch(0.22 0.03 290);
-  --secondary-foreground: oklch(0.95 0.01 290);
-  --muted: oklch(0.22 0.03 290);
-  --muted-foreground: oklch(0.68 0.03 290);
-  --accent: oklch(0.25 0.05 293);
-  --accent-foreground: oklch(0.95 0.01 290);
-  --destructive: oklch(0.65 0.2 25);
-  --destructive-foreground: oklch(0.98 0.01 290);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.62 0.21 293);
-  --chart-1: oklch(0.62 0.21 293);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --radius: 0.5rem;
+  /* Charles Bridge fog — sepia parchment with ink-black silhouettes */
+  --background: oklch(0.93 0.025 75);
+  --foreground: oklch(0.2 0.02 55);
+  --card: oklch(0.895 0.03 72);
+  --card-foreground: oklch(0.2 0.02 55);
+  --popover: oklch(0.93 0.025 75);
+  --popover-foreground: oklch(0.2 0.02 55);
+  --primary: oklch(0.24 0.035 50);
+  --primary-foreground: oklch(0.96 0.02 80);
+  --secondary: oklch(0.85 0.03 68);
+  --secondary-foreground: oklch(0.24 0.025 55);
+  --muted: oklch(0.87 0.025 68);
+  --muted-foreground: oklch(0.46 0.03 55);
+  --accent: oklch(0.72 0.11 65);
+  --accent-foreground: oklch(0.2 0.02 50);
+  --destructive: oklch(0.5 0.15 30);
+  --destructive-foreground: oklch(0.97 0.01 80);
+  --border: oklch(0.35 0.03 55 / 18%);
+  --input: oklch(0.35 0.03 55 / 24%);
+  --ring: oklch(0.72 0.11 65);
+  --chart-1: oklch(0.62 0.12 55);
+  --chart-2: oklch(0.55 0.1 145);
+  --chart-3: oklch(0.7 0.14 70);
+  --chart-4: oklch(0.5 0.08 30);
+  --chart-5: oklch(0.45 0.03 55);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
 @layer base {
@@ -76,10 +77,19 @@
 
   body {
     background-color: var(--color-background);
+    background-image:
+      radial-gradient(ellipse 70% 45% at 50% -10%, oklch(0.97 0.02 85 / 65%) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 85% 100%, oklch(0.3 0.03 55 / 12%) 0%, transparent 70%);
+    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 @utility fade-up {
@@ -102,7 +112,7 @@
 @utility glow-primary {
   background: radial-gradient(
     ellipse 60% 50% at 50% 0%,
-    oklch(0.62 0.21 293 / 18%) 0%,
+    oklch(0.72 0.11 65 / 28%) 0%,
     transparent 70%
   );
 }
