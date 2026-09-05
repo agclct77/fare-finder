@@ -1,27 +1,14 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useDocumentHead } from "@/lib/document-head";
 
-export const Route = createFileRoute("/signin")({
-  head: () => ({
-    meta: [
-      { title: "Sign in — Flight Price Notifier" },
-      {
-        name: "description",
-        content: "Sign in to Flight Price Notifier to track flight price drops.",
-      },
-      { property: "og:title", content: "Sign in — Flight Price Notifier" },
-      {
-        property: "og:description",
-        content: "Sign in to Flight Price Notifier to track flight price drops.",
-      },
-      { property: "og:type", content: "website" },
-    ],
-  }),
-  component: SignIn,
-});
+export default function SignUp() {
+  useDocumentHead({
+    title: "Sign up — Flight Price Notifier",
+    description: "Create an account to get flight price drop alerts.",
+  });
 
-function SignIn() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,21 +19,30 @@ function SignIn() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: window.location.origin },
+    });
     setLoading(false);
     if (error) {
       setError(error.message);
       return;
     }
-    navigate({ to: "/app" });
+    // Email confirmation is disabled in this project, so signup signs in immediately.
+    if (data.session) {
+      navigate("/app");
+    } else {
+      navigate("/signin");
+    }
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="fade-up w-full max-w-md rounded-2xl border border-border bg-card p-8">
-        <h1 className="text-2xl font-bold tracking-tight">Sign in / 登入</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Sign up / 註冊</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in to track your flight price alerts.
+          Create an account to start tracking flight prices.
         </p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
@@ -71,7 +67,8 @@ function SignIn() {
               id="password"
               type="password"
               required
-              autoComplete="current-password"
+              minLength={6}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
@@ -87,13 +84,13 @@ function SignIn() {
             disabled={loading}
             className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85 disabled:opacity-50"
           >
-            {loading ? "Signing in…" : "Sign in / 登入"}
+            {loading ? "Creating account…" : "Sign up / 註冊"}
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          No account yet?{" "}
-          <Link to="/signup" className="font-medium text-primary hover:underline">
-            Sign up / 註冊
+          Already have an account?{" "}
+          <Link to="/signin" className="font-medium text-primary hover:underline">
+            Sign in / 登入
           </Link>
         </p>
       </div>
