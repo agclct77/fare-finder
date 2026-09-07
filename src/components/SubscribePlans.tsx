@@ -14,7 +14,7 @@ type Subscription = {
 };
 
 type Plan = {
-  plan_name: "tokyo" | "seoul";
+  plan_name: "tokyo" | "seoul" | "london";
   label: string;
   route: string;
   hintPrice: number;
@@ -23,6 +23,7 @@ type Plan = {
 const PLANS: Plan[] = [
   { plan_name: "tokyo", label: "台北 ✈ 東京", route: "TPE-TYO", hintPrice: 9325 },
   { plan_name: "seoul", label: "台北 ✈ 首爾", route: "TPE-SEL", hintPrice: 5989 },
+  { plan_name: "london", label: "台北 ✈ 倫敦", route: "TPE-LON", hintPrice: 20524 },
 ];
 
 async function fetchSubscriptions(email: string): Promise<Subscription[]> {
@@ -118,7 +119,7 @@ export function SubscribePlans({ email }: { email: string }) {
   const byRoute = new Map((subscriptions ?? []).map((s) => [s.route, s]));
 
   return (
-    <div className="grid w-full gap-4 sm:grid-cols-2">
+    <div className="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {PLANS.map((plan) => (
         <PlanCard key={plan.plan_name} plan={plan} subscription={byRoute.get(plan.route)} email={email} />
       ))}

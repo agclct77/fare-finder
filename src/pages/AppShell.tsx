@@ -44,7 +44,7 @@ export default function AppShell({ user }: { user: User }) {
           選一條航線，設定目標價，降價就寄信通知你。
         </p>
         <div
-          className="fade-up mt-10 w-full max-w-2xl"
+          className="fade-up mt-10 w-full max-w-4xl"
           style={{ "--fade-delay": "200ms" } as React.CSSProperties}
         >
           {user.email && <SubscribePlans email={user.email} />}
