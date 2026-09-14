@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const API_URL = import.meta.env["VITE_FLIGHT_API_URL"];
 
+type SubscriptionStatus = "pending_payment" | "active" | "cancelled" | "expired";
+
 type Subscription = {
   email: string;
   route: string;
@@ -11,6 +13,8 @@ type Subscription = {
   destination: string;
   target_price: number;
   currency: string;
+  subscription_status?: SubscriptionStatus;
+  current_period_end_date?: string;
 };
 
 type Plan = {
@@ -34,6 +38,9 @@ async function fetchSubscriptions(email: string): Promise<Subscription[]> {
   return data.subscriptions ?? [];
 }
 
+// /subscribe returns either an ECPay auto-submit checkout form (text/html — a
+// new or lapsed subscriber must pay) or a plain JSON ack (an in-place update
+// for an already-paid subscriber changing their target price — no re-payment).
 async function postSubscribe(body: { email: string; plan_name: string; target_price: number }) {
   const res = await fetch(`${API_URL}/subscribe`, {
     method: "POST",
@@ -41,6 +48,20 @@ async function postSubscribe(body: { email: string; plan_name: string; target_pr
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error("Subscribe failed");
+  const contentType = res.headers.get("content-type") ?? "";
+  if (contentType.includes("text/html")) {
+    return { type: "checkout" as const, html: await res.text() };
+  }
+  return { type: "updated" as const, data: await res.json() };
+}
+
+async function postCancel(body: { email: string; route: string }) {
+  const res = await fetch(`${API_URL}/cancel`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("Cancel failed");
   return res.json();
 }
 
@@ -55,13 +76,31 @@ function PlanCard({ plan, subscription, email }: { plan: Plan; subscription?: Su
     if (subscription) setTargetPrice(String(subscription.target_price));
   }, [subscription]);
 
-  const mutation = useMutation({
+  const status = subscription?.subscription_status;
+
+  const subscribeMutation = useMutation({
     mutationFn: postSubscribe,
+    onSuccess: (result) => {
+      setError(null);
+      if (result.type === "checkout") {
+        // Hand the browser to ECPay's cashier via the returned auto-submit form.
+        document.open();
+        document.write(result.html);
+        document.close();
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["subscriptions", email] });
+    },
+    onError: () => setError("訂閱失敗，請稍後再試"),
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: postCancel,
     onSuccess: () => {
       setError(null);
       queryClient.invalidateQueries({ queryKey: ["subscriptions", email] });
     },
-    onError: () => setError("訂閱失敗，請稍後再試"),
+    onError: () => setError("取消失敗，請稍後再試"),
   });
 
   function handleSubmit(e: FormEvent) {
@@ -71,17 +110,42 @@ function PlanCard({ plan, subscription, email }: { plan: Plan; subscription?: Su
       setError("請輸入有效的目標價");
       return;
     }
-    mutation.mutate({ email, plan_name: plan.plan_name, target_price: price });
+    subscribeMutation.mutate({ email, plan_name: plan.plan_name, target_price: price });
   }
+
+  function handleCancel() {
+    cancelMutation.mutate({ email, route: plan.route });
+  }
+
+  const badge = (() => {
+    switch (status) {
+      case "active":
+        return { text: "已訂閱", className: "bg-primary/15 text-primary" };
+      case "pending_payment":
+        return { text: "未完成付款", className: "bg-destructive/15 text-destructive" };
+      case "cancelled":
+        return { text: `已取消 · 有效至 ${subscription?.current_period_end_date ?? ""}`, className: "bg-secondary text-secondary-foreground" };
+      case "expired":
+        return { text: "已結束", className: "bg-muted text-muted-foreground" };
+      default:
+        return null;
+    }
+  })();
+
+  const submitLabel = (() => {
+    if (subscribeMutation.isPending) return "處理中…";
+    if (status === "active" || status === "cancelled") return "更新目標價";
+    if (status === "pending_payment") return "完成付款 / Pay";
+    if (status === "expired") return "重新訂閱";
+    return "開始追蹤";
+  })();
 
   return (
     <div className="fade-up rounded-2xl border border-border bg-card p-6 text-left">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h3 className="font-display text-lg font-semibold">{plan.label}</h3>
-        {subscription && (
-          <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
-            已訂閱
-          </span>
+        {badge && (
+          <span className={`rounded-full px-3 py-1 text-xs font-medium ${badge.className}`}>{badge.text}</span>
         )}
       </div>
       <p className="mt-1 text-sm text-muted-foreground">目前最低約 NT${plan.hintPrice.toLocaleString()}</p>
@@ -100,11 +164,21 @@ function PlanCard({ plan, subscription, email }: { plan: Plan; subscription?: Su
         {error && <p className="text-sm text-destructive">{error}</p>}
         <button
           type="submit"
-          disabled={mutation.isPending}
+          disabled={subscribeMutation.isPending}
           className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85 disabled:opacity-50"
         >
-          {mutation.isPending ? "處理中…" : subscription ? "更新目標價" : "開始追蹤"}
+          {submitLabel}
         </button>
+        {status === "active" && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={cancelMutation.isPending}
+            className="w-full rounded-lg border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/70 disabled:opacity-50"
+          >
+            {cancelMutation.isPending ? "取消中…" : "取消訂閱"}
+          </button>
+        )}
       </form>
     </div>
   );
